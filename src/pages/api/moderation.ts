@@ -40,7 +40,7 @@ enum ModronRecommentation {
   unsafe = "unsafe",
 }
 
-type ModronResponse = {
+export type ModronResponse = {
   recommendation: ModronRecommentation;
   input: string;
   raw: OpenAIModerationResponse;
@@ -71,7 +71,11 @@ export default async function handler(
   }
 }
 
-export async function getModerationRecommendation(input: string) {
+export async function getModerationRecommendation(
+  input: string
+): Promise<ModronResponse> {
+  console.info(input);
+
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const data: OpenAIModerationResponse = await fetch(
     "https://api.openai.com/v1/moderations",
@@ -83,13 +87,19 @@ export async function getModerationRecommendation(input: string) {
       },
       body: JSON.stringify({ input }),
     }
-  ).then((response) => response.json());
+  )
+    .then((response) => response.json())
+    .catch((err) => {
+      throw err;
+    });
 
   const customResponse: ModronResponse = {
     recommendation: getRecommendation(data),
     input: input,
     raw: data,
   };
+
+  console.info(customResponse);
 
   return customResponse;
 }
